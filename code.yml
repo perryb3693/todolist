@@ -1,0 +1,25 @@
+- hosts: all
+  become: yes
+  become_user: ubuntu
+  gather_facts: no
+
+  tasks:
+    - name: pull branch master
+      git:
+        repo: "{{ repo_url }}/{{ repo }}.git"
+        dest: "{{ repo_dir }}"
+        accept_hostkey: yes
+
+- hosts: all
+  gather_facts: no
+  tasks:
+    - name: Create virtual environment
+      command: python3 -m venv venv
+      args:
+        chdir: "{{ repo_dir }}"
+
+    - name: install python requirements
+      pip:
+        requirements: "{{ repo_dir }}/requirements.txt"
+        state: present
+        executable: "{{ repo_dir }}/venv/bin/pip"
