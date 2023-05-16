@@ -335,7 +335,6 @@ DB_PORT=5432
 SECRET_KEY=vf^b#k_@6td43!4+uw&g^zpkbntdn+!v1hm$yu$x4m%=d)isc3' > env
 ```
 Use Ansible playbook to copy env file from master to target nodes
-
 ```
 ---
 - name: Set environment variables on hosts
@@ -352,4 +351,41 @@ Use Ansible playbook to copy env file from master to target nodes
 ```
 $ ansible-playbook -i inventory.ini copyenv.yml
 ```
+Configure "to-do-list" daemon service file to automatically start Gunicorn
+```
+---
+- hosts: all
+  become: yes
+  become_user: root
+  gather_facts: no
+  tasks:
+    - name: Copy Gunicorn systemd service file
+      template:
+        src: /home/ubuntu/todolist/todolist.service
+        dest: /etc/systemd/system/todolist.service
+      register: gunicorn_service
 
+    - name: Enable and start Gunicorn service
+      systemd:
+        name: todolist
+        state: started
+        enabled: yes
+      when: gunicorn_service.changed
+      notify:
+        - Restart Gunicorn
+
+    - name: Restart Gunicorn
+      systemd:
+        name: todolist
+        state: restarted
+      when: gunicorn_service.changed
+
+  handlers:
+    - name: Restart Gunicorn
+      systemd:
+        name: todolist
+        state: restarted
+```
+```
+ansible-playbook -i inventory.ini gunicorn.yml
+```
