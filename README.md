@@ -216,7 +216,7 @@ $ terraform init
 $ terraform plan
 $ terraform apply
 ```
-***Configure Ansible to Automate Application Deployment on Target Nodes***
+***Configure Ansible to Prepare Environment on Target Nodes for Application Deployment***
 
 Write Ansible inventory and playbook configurations to install and configure the necessary dependencies for the "To-Do-List" Django application in both of the target nodes.
 
@@ -324,6 +324,8 @@ Download application files from Github and create a python virtual environment f
 ```
 $ ansible-playbook -i inventory.ini code.yml
 ```
+***Configure the Postgres Database***
+
 Configure the database "env" file
 ```
 echo '
@@ -351,6 +353,8 @@ Use Ansible playbook to copy env file from master to target nodes
 ```
 $ ansible-playbook -i inventory.ini copyenv.yml
 ```
+***Configure Gunicorn in Target Nodes**
+
 Configure "to-do-list" daemon service file to automatically start Gunicorn
 ```
 ---
@@ -390,6 +394,7 @@ Configure "to-do-list" daemon service file to automatically start Gunicorn
 ansible-playbook -i inventory.ini gunicorn.yml
 ```
 ***Configure Nginx to Proxy Pass to Gunicorn***
+
 With Gunicorn configured, create an Nginx configuration file to pass HTTP traffic over port 80 to the Gunicorn service
 ```
 $ echo '
