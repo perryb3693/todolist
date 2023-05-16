@@ -389,3 +389,68 @@ Configure "to-do-list" daemon service file to automatically start Gunicorn
 ```
 ansible-playbook -i inventory.ini gunicorn.yml
 ```
+***Configure Nginx to Proxy Pass to Gunicorn***
+With Gunicorn configured, create an Nginx configuration file to pass HTTP traffic over port 80 to the Gunicorn service
+```
+$ echo '
+server {
+    listen 80;
+
+    server_name public_ip;
+
+    location / {
+        proxy_pass http://localhost:9876;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+}' > todolist
+```
+Deploy the nginx configuration file to target nodes using an ansible playbook
+```
+--
+- name: Configure Nginx port forwarding
+  hosts: all
+  become: true
+  become_user: root
+  gather_facts: no
+  tasks:
+    - name: Install Nginx
+      apt:
+        name: nginx
+        state: present
+
+    - name: Configure Nginx
+      template:
+        src: ~/nginx/todolist
+        dest: /etc/nginx/sites-available
+        owner: root
+        group: root
+        mode: 0644
+      notify: Restart Nginx
+
+    - name: Change public_ip in Nginx configuration
+      replace:
+        path: /etc/nginx/sites-available/todolist
+        regexp: 'server_name public_ip;'
+        replace: 'server_name {{ ansible_host }};'
+
+    - name: Enable Nginx site
+      file:
+        src: /etc/nginx/sites-available/todolist
+        dest: /etc/nginx/sites-enabled/todolist
+        state: link
+      notify: Restart Nginx
+
+  handlers:
+    - name: Restart Nginx
+      service:
+        name: nginx
+        state: restarted
+```
+```
+$ ansible-playbook -i inventory.ini nginx.yml
+```
+Once the playbook has been deployed, verify Django application functionality by accessing your webserver through its public IP address on port 80. 
