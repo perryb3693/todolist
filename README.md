@@ -253,7 +253,7 @@ django_project=to_do_proj
 ```
 Verify ansible connectivity between master and target nodes
 ```
-ansible webservers -m ping
+$ ansible webservers -m ping
 ```
 Create a systems update playbook and deploy to target nodes
 ```
@@ -269,12 +269,12 @@ Create a systems update playbook and deploy to target nodes
       register: result
     - debug: var=result.stdout_lines
 ```
-```bash
-ansible-playbook -i inventory.ini updates.yml
+```
+$ ansible-playbook -i inventory.ini updates.yml
 ```
 Install Python, pip, and nginx packages on target nodes
 
-```bash
+```
 ---
 - hosts: all
   become: yes
@@ -290,11 +290,11 @@ Install Python, pip, and nginx packages on target nodes
        - python-pip
        - nginx
 ```
-```bash
-ansible-playbook -i inventory.ini packages.yml
+```
+$ ansible-playbook -i inventory.ini packages.yml
 ```
 Download application files from Github and create a python virtual environment for Django app deployment
-```bash
+```
 - hosts: all
   become: yes
   become_user: ubuntu
@@ -321,13 +321,11 @@ Download application files from Github and create a python virtual environment f
         state: present
         executable: "{{ repo_dir }}/venv/bin/pip"
 ```
-
-```bash
-ansible-playbook -i inventory.ini code.yml
 ```
-
+$ ansible-playbook -i inventory.ini code.yml
+```
 Configure the database "env" file
-```bash
+```
 echo '
 DB_NAME=todolist
 DB_USER=postgres
@@ -336,6 +334,22 @@ DB_HOST=db1.chzveui56egk.us-east-1.rds.amazonaws.com
 DB_PORT=5432
 SECRET_KEY=vf^b#k_@6td43!4+uw&g^zpkbntdn+!v1hm$yu$x4m%=d)isc3' > env
 ```
+Use Ansible playbook to copy env file from master to target nodes
 
-
+```
+---
+- name: Set environment variables on hosts
+  hosts: all
+  become: true
+  become_user: ubuntu
+  tasks:
+    - name: Copy env file to hosts
+      copy:
+        src: /home/ubuntu/todolist/env
+        dest: /home/ubuntu/todo-list/.env
+        mode: 0644
+```
+```
+$ ansible-playbook -i inventory.ini copyenv.yml
+```
 
