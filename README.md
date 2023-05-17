@@ -5,6 +5,7 @@ The objective of this project is to deploy the "To-Do-List" Django web applicati
 
 ***"To-Do-List" Architecture Diagram***
 
+![SAVETHS drawio](https://github.com/perryb3693/todolist/assets/129805541/c04177e3-1d14-4de5-8b2c-8b83123f2fb2)
 
 
 ***Configure Terraform to Provision Infrastructure (IaC)***
