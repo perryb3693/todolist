@@ -1,7 +1,7 @@
 # todolist
 Launch a To-Do-List Django Application using Ansible and Terraform
 
-The objective of this project is to deploy the "To-Do-List" Django web application through the utilization of Terraform, Ansible, Python Virtual Environment, Gunicorn, and Postgres. 
+The objective of this project is to deploy the "To-Do-List" Django web application through the utilization of Terraform, Ansible, Python Virtual Environment, Gunicorn, and Nginx. 
 
 ***"To-Do-List" Architecture Diagram***
 
